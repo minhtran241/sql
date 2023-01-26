@@ -36,10 +36,9 @@ VALUES
 	('Astle');
 
 SELECT
-	c.cricket_id,
-	c.name,
-	f.football_id,
-	f.name
+	cricket_id,
+	football_id,
+	name
 FROM
 	cricket AS c
-	INNER JOIN football AS f ON c.name = f.name;
+	INNER JOIN football AS f USING (name);
