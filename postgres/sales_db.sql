@@ -732,10 +732,45 @@ RETURNS INTEGER AS
 $body$
     SELECT COUNT(*)
     FROM sales_order AS so
-    INNER JOIN customer AS c
-    ON c.id = so.customer_id
+    NATURAL JOIN customer AS c
     WHERE c.first_name = cus_fname AND c.last_name = cus_lname;
 $body$
 LANGUAGE SQL;
 
+CREATE OR REPLACE FUNCTION fn_get_last_orders()
+RETURNS sales_order AS
+$body$
+    SELECT *
+    FROM sales_order
+    ORDER BY time_order_taken DESC
+    LIMIT 1;
+$body$
+LANGUAGE SQL;
 
+SELECT (fn_get_last_orders()).*;
+
+CREATE OR REPLACE FUNCTION fn_get_employees_state(state_name CHAR(2))
+RETURNS SETOF sales_person AS
+$body$
+    SELECT *
+    FROM sales_person
+    WHERE state = state_name;
+$body$
+LANGUAGE SQL;
+
+SELECT first_name, last_name, phone
+FROM fn_get_employees_state('CA');
+
+CREATE OR REPLACE FUNCTION fn_get_price_product_name(prod_name VARCHAR(30))
+RETURNS NUMERIC(6,2) AS
+$body$
+BEGIN
+    RETURN i.price
+    FROM item AS i
+    NATURAL JOIN product AS p
+    WHERE p.name = prod_name;
+END
+$body$
+LANGUAGE plpgsql;
+
+SELECT fn_get_price_product_name('Grandview');
