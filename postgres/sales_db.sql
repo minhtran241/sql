@@ -769,8 +769,111 @@ BEGIN
     FROM item AS i
     NATURAL JOIN product AS p
     WHERE p.name = prod_name;
-END
+END;
 $body$
 LANGUAGE plpgsql;
 
 SELECT fn_get_price_product_name('Grandview');
+
+CREATE OR REPLACE FUNCTION fn_get_sum(val1 INT, val2 INT)
+RETURNS INT AS
+$body$
+DECLARE
+    ans INT;
+BEGIN
+    ans := val1 + val2;
+    RETURN ans;
+END;
+$body$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fn_get_random_number(min_val INT, max_val INT)
+RETURNS INT AS
+$body$
+DECLARE
+    rand INT;
+BEGIN
+    SELECT RANDOM() * (max_val - min_val) + min_val INTO rand;
+    RETURN rand;
+END;
+$body$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fn_get_random_salesperson()
+RETURNS VARCHAR AS
+$body$
+DECLARE
+    rand INT;
+    num_rows INT;
+    emp RECORD;
+BEGIN
+    SELECT COUNT(*)
+    FROM sales_person
+    INTO num_rows;
+    SELECT RANDOM() * (num_rows - 1) + 1 INTO rand;
+    SELECT *
+    FROM sales_person
+    INTO emp
+    WHERE id = rand;
+    RETURN CONCAT(emp.first_name, ' ', emp.last_name);
+END;
+$body$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fn_get_sum_2(IN v1 INT, IN v2 INT, OUT ans INT)
+AS
+$body$
+BEGIN
+    ans := v1 + v2;
+END;
+$body$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fn_get_cust_birthday(IN the_month INT, OUT bd_month INT, OUT bd_day INT,
+                                               OUT f_name VARCHAR, OUT l_name VARCHAR)
+AS
+$body$
+BEGIN
+    SELECT EXTRACT(MONTH FROM birth_date), EXTRACT(DAY FROM birth_date),
+    first_name, last_name
+    INTO bd_month, bd_day, f_name, l_name
+    FROM customer
+    WHERE EXTRACT(MONTH FROM birth_date) = the_month
+    LIMIT 1;
+END
+$body$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fn_get_sales_people()
+RETURNS SETOF sales_person AS
+$body$
+BEGIN
+    RETURN QUERY
+    SELECT * 
+    FROM sales_person;
+END;
+$body$
+LANGUAGE plpgsql;
+
+SELECT (fn_get_sales_people()).street;
+
+-- Multiple tables
+CREATE OR REPLACE FUNCTION fn_get_top_10_expensive_prods()
+RETURNS TABLE (
+    name VARCHAR(30),
+    supplier VARCHAR(30),
+    price NUMERIC(6,2)
+) AS
+$body$
+BEGIN
+    RETURN QUERY
+    SELECT p.name, p.supplier, i.price
+    FROM product AS p
+    NATURAL JOIN item AS i
+    ORDER BY i.price DESC
+    LIMIT 10;
+END;
+$body$
+LANGUAGE plpgsql;
+
+SELECT (fn_get_top_10_expensive_prods()).*;
