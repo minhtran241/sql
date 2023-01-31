@@ -664,3 +664,78 @@ ORDER BY so.purchase_order_number;
 
 SELECT *, (quantity * price) AS total_price
 FROM purchase_order_overview;
+
+CREATE OR REPLACE FUNCTION fn_total_price(NUMERIC(6,2),INT)
+RETURNS NUMERIC(6,2) AS
+$body$
+    SELECT $1 * $2;
+$body$
+LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION fn_update_employee_state(sales_person_id INT,state_name CHAR(2))
+RETURNS VOID AS
+$body$
+    UPDATE sales_person
+    SET state = state_name
+    WHERE id = sales_person_id;
+$body$
+LANGUAGE SQL;
+
+SELECT fn_update_employee_state(1,'MI');
+
+CREATE OR REPLACE FUNCTION fn_max_product_price()
+RETURNS NUMERIC(6,2) AS
+$body$
+    SELECT MAX(price)
+    FROM item;
+$body$
+LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION fn_get_value_inventory()
+RETURNS NUMERIC(6,2) AS
+$body$
+    SELECT SUM(price)
+    FROM item;
+$body$
+LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION fn_number_customers()
+RETURNS INTEGER AS
+$body$
+    SELECT COUNT(*)
+    FROM customer;
+$body$
+LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION fn_number_customes_no_phone()
+RETURNS INTEGER AS
+$body$
+    SELECT COUNT(*)
+    FROM customer
+    WHERE phone IS NULL;
+$body$
+LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION fn_get_number_customes_from_state(state_name CHAR(2))
+RETURNS INTEGER AS
+$body$
+    SELECT COUNT(*)
+    FROM customer
+    WHERE state = state_name;
+$body$
+LANGUAGE SQL;
+
+SELECT fn_get_number_customes_from_state('TX');
+
+CREATE OR REPLACE FUNCTION fn_get_number_orders_from_customer(cus_fname VARCHAR(30),cus_lname VARCHAR(30))
+RETURNS INTEGER AS
+$body$
+    SELECT COUNT(*)
+    FROM sales_order AS so
+    INNER JOIN customer AS c
+    ON c.id = so.customer_id
+    WHERE c.first_name = cus_fname AND c.last_name = cus_lname;
+$body$
+LANGUAGE SQL;
+
+
