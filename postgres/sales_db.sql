@@ -593,7 +593,74 @@ SELECT si.sales_order_id, si.quantity, i.product_id
 FROM sales_item AS si CROSS JOIN item AS i
 ORDER BY i.product_id;
 
+SELECT first_name, last_name, street, city, zip, birth_date
+FROM customer
+WHERE EXTRACT(MONTH FROM birth_date) = 12
+UNION
+SELECT first_name, last_name, street, city, zip, birth_date
+FROM sales_person
+WHERE EXTRACT(MONTH FROM birth_date) = 12
+ORDER BY birth_date;
 
+SELECT product_id, price
+FROM item
+WHERE price IS NULL;
 
+SELECT first_name, last_name
+FROM customer
+WHERE first_name SIMILAR TO 'M%';
 
+SELECT first_name, last_name
+FROM customer
+WHERE first_name LIKE 'D%' OR last_name LIKE '%n';
 
+SELECT first_name, last_name
+FROM customer
+WHERE first_name ~ '^Ma';
+
+SELECT first_name, last_name
+FROM customer
+WHERE last_name ~ 'ez|son';
+
+SELECT first_name, last_name
+FROM customer
+WHERE last_name ~ '[w-z]';
+
+SELECT EXTRACT(MONTH FROM birth_date) AS birth_month, COUNT(id) AS num_customer
+FROM customer
+GROUP BY birth_month
+ORDER BY birth_month;
+
+SELECT EXTRACT(MONTH FROM birth_date) AS birth_month, COUNT(*) AS num_customer
+FROM customer
+GROUP BY birth_month
+HAVING COUNT(*) > 1
+ORDER BY birth_month;
+
+SELECT 
+COUNT(*) AS items, SUM(price) AS value, 
+ROUND(AVG(price), 2) AS average,
+MIN(price) AS min, MAX(price) AS max
+FROM item;
+
+CREATE VIEW purchase_order_overview AS
+SELECT so.purchase_order_number, 
+c.company AS customer_company,
+p.supplier, p.name AS product_name, 
+si.quantity, i.price,
+CONCAT(sp.first_name, ' ', sp.last_name) AS sales_person_fullname
+FROM sales_order AS so
+JOIN sales_item AS si
+ON so.id = si.sales_order_id
+JOIN item AS i
+ON i.id = si.item_id
+JOIN customer AS c
+ON c.id = so.customer_id
+JOIN sales_person AS sp
+ON sp.id = so.sales_person_id
+JOIN product AS p
+ON p.id = i.product_id
+ORDER BY so.purchase_order_number;
+
+SELECT *, (quantity * price) AS total_price
+FROM purchase_order_overview;
