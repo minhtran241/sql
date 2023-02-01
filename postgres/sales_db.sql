@@ -764,12 +764,12 @@ FROM fn_get_employees_state('CA');
 CREATE OR REPLACE FUNCTION fn_get_price_product_name(prod_name VARCHAR(30))
 RETURNS NUMERIC(6,2) AS
 $body$
-BEGIN
-    RETURN i.price
-    FROM item AS i
-    NATURAL JOIN product AS p
-    WHERE p.name = prod_name;
-END;
+    BEGIN
+        RETURN i.price
+        FROM item AS i
+        NATURAL JOIN product AS p
+        WHERE p.name = prod_name;
+    END;
 $body$
 LANGUAGE plpgsql;
 
@@ -778,54 +778,54 @@ SELECT fn_get_price_product_name('Grandview');
 CREATE OR REPLACE FUNCTION fn_get_sum(val1 INT, val2 INT)
 RETURNS INT AS
 $body$
-DECLARE
-    ans INT;
-BEGIN
-    ans := val1 + val2;
-    RETURN ans;
-END;
+    DECLARE
+        ans INT;
+    BEGIN
+        ans := val1 + val2;
+        RETURN ans;
+    END;
 $body$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION fn_get_random_number(min_val INT, max_val INT)
 RETURNS INT AS
 $body$
-DECLARE
-    rand INT;
-BEGIN
-    SELECT RANDOM() * (max_val - min_val) + min_val INTO rand;
-    RETURN rand;
-END;
+    DECLARE
+        rand INT;
+    BEGIN
+        SELECT RANDOM() * (max_val - min_val) + min_val INTO rand;
+        RETURN rand;
+    END;
 $body$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION fn_get_random_salesperson()
 RETURNS VARCHAR AS
 $body$
-DECLARE
-    rand INT;
-    num_rows INT;
-    emp RECORD;
-BEGIN
-    SELECT COUNT(*)
-    FROM sales_person
-    INTO num_rows;
-    SELECT RANDOM() * (num_rows - 1) + 1 INTO rand;
-    SELECT *
-    FROM sales_person
-    INTO emp
-    WHERE id = rand;
-    RETURN CONCAT(emp.first_name, ' ', emp.last_name);
-END;
+    DECLARE
+        rand INT;
+        num_rows INT;
+        emp RECORD;
+    BEGIN
+        SELECT COUNT(*)
+        FROM sales_person
+        INTO num_rows;
+        SELECT RANDOM() * (num_rows - 1) + 1 INTO rand;
+        SELECT *
+        FROM sales_person
+        INTO emp
+        WHERE id = rand;
+        RETURN CONCAT(emp.first_name, ' ', emp.last_name);
+    END;
 $body$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION fn_get_sum_2(IN v1 INT, IN v2 INT, OUT ans INT)
 AS
 $body$
-BEGIN
-    ans := v1 + v2;
-END;
+    BEGIN
+        ans := v1 + v2;
+    END;
 $body$
 LANGUAGE plpgsql;
 
@@ -833,25 +833,25 @@ CREATE OR REPLACE FUNCTION fn_get_cust_birthday(IN the_month INT, OUT bd_month I
                                                OUT f_name VARCHAR, OUT l_name VARCHAR)
 AS
 $body$
-BEGIN
-    SELECT EXTRACT(MONTH FROM birth_date), EXTRACT(DAY FROM birth_date),
-    first_name, last_name
-    INTO bd_month, bd_day, f_name, l_name
-    FROM customer
-    WHERE EXTRACT(MONTH FROM birth_date) = the_month
-    LIMIT 1;
-END
+    BEGIN
+        SELECT EXTRACT(MONTH FROM birth_date), EXTRACT(DAY FROM birth_date),
+        first_name, last_name
+        INTO bd_month, bd_day, f_name, l_name
+        FROM customer
+        WHERE EXTRACT(MONTH FROM birth_date) = the_month
+        LIMIT 1;
+    END
 $body$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION fn_get_sales_people()
 RETURNS SETOF sales_person AS
 $body$
-BEGIN
-    RETURN QUERY
-    SELECT * 
-    FROM sales_person;
-END;
+    BEGIN
+        RETURN QUERY
+        SELECT * 
+        FROM sales_person;
+    END;
 $body$
 LANGUAGE plpgsql;
 
@@ -865,14 +865,14 @@ RETURNS TABLE (
     price NUMERIC(6,2)
 ) AS
 $body$
-BEGIN
-    RETURN QUERY
-    SELECT p.name, p.supplier, i.price
-    FROM product AS p
-    NATURAL JOIN item AS i
-    ORDER BY i.price DESC
-    LIMIT 10;
-END;
+    BEGIN
+        RETURN QUERY
+        SELECT p.name, p.supplier, i.price
+        FROM product AS p
+        NATURAL JOIN item AS i
+        ORDER BY i.price DESC
+        LIMIT 10;
+    END;
 $body$
 LANGUAGE plpgsql;
 
@@ -881,89 +881,105 @@ SELECT (fn_get_top_10_expensive_prods()).*;
 CREATE OR REPLACE FUNCTION fn_check_month_orders(the_month INT)
 RETURNS VARCHAR AS
 $body$
-DECLARE
-    total_orders INT;
-BEGIN
-    SELECT COUNT(purchase_order_number)
-    INTO total_orders
-    FROM sales_order
-    WHERE EXTRACT(MONTH FROM time_order_taken) = the_month;
-    IF total_orders > 50 THEN
-        RETURN CONCAT(total_orders, ' Orders: Doing Good');
-    ELSEIF total_orders < 50 THEN
-        RETURN CONCAT(total_orders, ' Orders: Doing Bad');
-    ELSE
-        RETURN CONCAT(total_orders, ' Orders: On Target');
-    END IF;
-END;
+    DECLARE
+        total_orders INT;
+    BEGIN
+        SELECT COUNT(purchase_order_number)
+        INTO total_orders
+        FROM sales_order
+        WHERE EXTRACT(MONTH FROM time_order_taken) = the_month;
+        IF total_orders > 50 THEN
+            RETURN CONCAT(total_orders, ' Orders: Doing Good');
+        ELSEIF total_orders < 50 THEN
+            RETURN CONCAT(total_orders, ' Orders: Doing Bad');
+        ELSE
+            RETURN CONCAT(total_orders, ' Orders: On Target');
+        END IF;
+    END;
 $body$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION fn_check_month_orders(the_month INT)
 RETURNS VARCHAR AS
 $body$
-DECLARE
-    total_orders INT;
-BEGIN
-    SELECT COUNT(purchase_order_number)
-    INTO total_orders
-    FROM sales_order
-    WHERE EXTRACT(MONTH FROM time_order_taken) = the_month;
-    CASE
-        WHEN total_orders < 1 THEN
-            RETURN CONCAT(total_orders, ' Orders: Doing Terrible');
-        WHEN total_orders > 1 AND total_orders < 5 THEN
-            RETURN CONCAT(total_orders, ' Orders: ON Target');
-        ELSE
-            RETURN CONCAT(total_orders, ' Orders: Doing Good');
-    END CASE;
-END;
+    DECLARE
+        total_orders INT;
+    BEGIN
+        SELECT COUNT(purchase_order_number)
+        INTO total_orders
+        FROM sales_order
+        WHERE EXTRACT(MONTH FROM time_order_taken) = the_month;
+        CASE
+            WHEN total_orders < 1 THEN
+                RETURN CONCAT(total_orders, ' Orders: Doing Terrible');
+            WHEN total_orders > 1 AND total_orders < 5 THEN
+                RETURN CONCAT(total_orders, ' Orders: ON Target');
+            ELSE
+                RETURN CONCAT(total_orders, ' Orders: Doing Good');
+        END CASE;
+    END;
 $body$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION fn_loop_test(max_num INT)
 RETURNS INT AS
 $body$
-DECLARE
-    i INT DEFAULT 1;
-    tot_sum INT DEFAULT 0;
-BEGIN
-    LOOP
-        tot_sum := tot_sum + i;
-        i := i + 1;
-        EXIT WHEN i > max_num;
-    END LOOP;
-    RETURN tot_sum;
-END;
+    DECLARE
+        i INT DEFAULT 1;
+        tot_sum INT DEFAULT 0;
+    BEGIN
+        LOOP
+            tot_sum := tot_sum + i;
+            i := i + 1;
+            EXIT WHEN i > max_num;
+        END LOOP;
+        RETURN tot_sum;
+    END;
 $body$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION fn_for_test(start_num INT, end_num INT, leap INT)
 RETURNS INT AS
 $body$
-DECLARE
-    tot_sum INT DEFAULT 0;
-BEGIN
-    FOR i IN start_num .. end_num BY leap
-    LOOP
-        tot_sum := tot_sum + i;
-    END LOOP;
-    RETURN tot_sum;
-END;
+    DECLARE
+        tot_sum INT DEFAULT 0;
+    BEGIN
+        FOR i IN start_num .. end_num BY leap
+        LOOP
+            tot_sum := tot_sum + i;
+        END LOOP;
+        RETURN tot_sum;
+    END;
 $body$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION fn_for_test(start_num INT, end_num INT, leap INT)
 RETURNS INT AS
 $body$
-DECLARE
-    tot_sum INT DEFAULT 0;
-BEGIN
-    FOR i IN REVERSE end_num .. start_num BY leap
-    LOOP
-        tot_sum := tot_sum + i;
-    END LOOP;
-    RETURN tot_sum;
-END;
+    DECLARE
+        tot_sum INT DEFAULT 0;
+    BEGIN
+        FOR i IN REVERSE end_num .. start_num BY leap
+        LOOP
+            tot_sum := tot_sum + i;
+        END LOOP;
+        RETURN tot_sum;
+    END;
+$body$
+LANGUAGE plpgsql;
+
+DO
+$body$
+    DECLARE
+        rec RECORD;
+    BEGIN
+        FOR rec IN
+            SELECT first_name, last_name
+            FROM sales_person
+            LIMIT 5
+        LOOP
+            RAISE NOTICE '% %', rec.first_name, rec.last_name;
+        END LOOP;
+     END;
 $body$
 LANGUAGE plpgsql;
