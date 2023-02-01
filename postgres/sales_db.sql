@@ -877,3 +877,93 @@ $body$
 LANGUAGE plpgsql;
 
 SELECT (fn_get_top_10_expensive_prods()).*;
+
+CREATE OR REPLACE FUNCTION fn_check_month_orders(the_month INT)
+RETURNS VARCHAR AS
+$body$
+DECLARE
+    total_orders INT;
+BEGIN
+    SELECT COUNT(purchase_order_number)
+    INTO total_orders
+    FROM sales_order
+    WHERE EXTRACT(MONTH FROM time_order_taken) = the_month;
+    IF total_orders > 50 THEN
+        RETURN CONCAT(total_orders, ' Orders: Doing Good');
+    ELSEIF total_orders < 50 THEN
+        RETURN CONCAT(total_orders, ' Orders: Doing Bad');
+    ELSE
+        RETURN CONCAT(total_orders, ' Orders: On Target');
+    END IF;
+END;
+$body$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fn_check_month_orders(the_month INT)
+RETURNS VARCHAR AS
+$body$
+DECLARE
+    total_orders INT;
+BEGIN
+    SELECT COUNT(purchase_order_number)
+    INTO total_orders
+    FROM sales_order
+    WHERE EXTRACT(MONTH FROM time_order_taken) = the_month;
+    CASE
+        WHEN total_orders < 1 THEN
+            RETURN CONCAT(total_orders, ' Orders: Doing Terrible');
+        WHEN total_orders > 1 AND total_orders < 5 THEN
+            RETURN CONCAT(total_orders, ' Orders: ON Target');
+        ELSE
+            RETURN CONCAT(total_orders, ' Orders: Doing Good');
+    END CASE;
+END;
+$body$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fn_loop_test(max_num INT)
+RETURNS INT AS
+$body$
+DECLARE
+    i INT DEFAULT 1;
+    tot_sum INT DEFAULT 0;
+BEGIN
+    LOOP
+        tot_sum := tot_sum + i;
+        i := i + 1;
+        EXIT WHEN i > max_num;
+    END LOOP;
+    RETURN tot_sum;
+END;
+$body$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fn_for_test(start_num INT, end_num INT, leap INT)
+RETURNS INT AS
+$body$
+DECLARE
+    tot_sum INT DEFAULT 0;
+BEGIN
+    FOR i IN start_num .. end_num BY leap
+    LOOP
+        tot_sum := tot_sum + i;
+    END LOOP;
+    RETURN tot_sum;
+END;
+$body$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fn_for_test(start_num INT, end_num INT, leap INT)
+RETURNS INT AS
+$body$
+DECLARE
+    tot_sum INT DEFAULT 0;
+BEGIN
+    FOR i IN REVERSE end_num .. start_num BY leap
+    LOOP
+        tot_sum := tot_sum + i;
+    END LOOP;
+    RETURN tot_sum;
+END;
+$body$
+LANGUAGE plpgsql;
