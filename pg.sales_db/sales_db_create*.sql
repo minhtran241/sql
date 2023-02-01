@@ -19,6 +19,24 @@ CREATE TABLE IF NOT EXISTS public.customer
     CONSTRAINT customer_pkey PRIMARY KEY (id)
 );
 
+CREATE TABLE IF NOT EXISTS public.distributor
+(
+    id integer NOT NULL DEFAULT nextval('distributor_id_seq'::regclass),
+    name character varying(100) COLLATE pg_catalog."default",
+    doj date DEFAULT now(),
+    CONSTRAINT distributor_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS public.distributor_audit
+(
+    id integer NOT NULL DEFAULT nextval('distributor_audit_id_seq'::regclass),
+    dist_id integer NOT NULL,
+    old_name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    new_name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    edit_date timestamp without time zone NOT NULL,
+    CONSTRAINT distributor_audit_pkey PRIMARY KEY (id)
+);
+
 CREATE TABLE IF NOT EXISTS public.item
 (
     product_id integer,
@@ -28,6 +46,14 @@ CREATE TABLE IF NOT EXISTS public.item
     price numeric(6, 2) NOT NULL,
     id integer NOT NULL DEFAULT nextval('item_id_seq'::regclass),
     CONSTRAINT item_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS public.past_due
+(
+    id integer NOT NULL DEFAULT nextval('past_due_id_seq'::regclass),
+    customer_id integer NOT NULL,
+    balance numeric(6, 2) NOT NULL,
+    CONSTRAINT past_due_pkey PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS public.product
@@ -91,6 +117,13 @@ CREATE TABLE IF NOT EXISTS public.sales_person
     id integer NOT NULL DEFAULT nextval('sales_person_id_seq'::regclass),
     CONSTRAINT sales_person_pkey PRIMARY KEY (id)
 );
+
+ALTER TABLE IF EXISTS public.distributor_audit
+    ADD CONSTRAINT distributor_audit_dist_id_fkey FOREIGN KEY (dist_id)
+    REFERENCES public.distributor (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
 
 ALTER TABLE IF EXISTS public.item
     ADD CONSTRAINT item_product_id_fkey FOREIGN KEY (product_id)

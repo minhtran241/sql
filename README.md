@@ -4,4 +4,4 @@
 
 1. sales_db
 
-<img src='./postgres/sales_db_er.pgerd.png'>
+<img src='./pg.sales_db/sales_db_erd.png'>
